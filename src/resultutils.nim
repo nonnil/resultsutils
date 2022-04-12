@@ -88,7 +88,7 @@ macro match*(results: untyped, node: untyped): untyped =
 
     of $Err:
       errIdent = if (resultIdent.isNil) or ($resultIdent == "_"): nil
-                else: resultIdent
+                 else: resultIdent
       errBody = body
 
   let

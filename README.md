@@ -26,5 +26,5 @@ more code examples can be found [here](https://github.com/nonnil/resultutils/tre
 
 ## Installation
 ```bash
-nimble install https://github.com/nonnil/resultutils
+nimble install resultutils
 ```

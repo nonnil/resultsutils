@@ -1,4 +1,4 @@
-import std / [ unittest ]
+import std / [ unittest, asyncdispatch ]
 import results
 import ../ src / resultutils
 
@@ -80,3 +80,35 @@ suite "match macro":
 
     check:
       msg == "hi, Rust"
+
+    match example():
+      Ok(outer):
+        check:
+          outer == "something is ok"
+
+        match greet("Rust"):
+          Ok(greet):
+            check:
+              greet == "hi, Rust"
+
+          Err():
+            fail
+
+      Err():
+        fail
+
+  test "async":
+    proc greet(name: string): Future[Result[string, string]] {.async.} =
+      if name.len > 0:
+        return ok("hi, " & name)
+      else:
+        return err("No name? 😐")
+
+    match waitFor greet("Nim"):
+      Ok(greet):
+        check:
+          greet == "hi, Nim"
+      
+      Err(error):
+        check:
+          error == "No name? 😐"

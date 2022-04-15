@@ -40,9 +40,6 @@ macro match*(results: untyped, node: untyped): untyped =
   ## 
   ## more code examples can be found `here<https://github.com/nonnil/resultutils/blob/main/tests/test_match.nim>`_
   
-  echo lispRepr results
-  echo treeRepr node
-
   expectKind results, { nnkCall, nnkIdent, nnkCommand, nnkDotExpr, nnkStmtListExpr }
   expectKind node, nnkStmtList
 
@@ -88,8 +85,6 @@ macro match*(results: untyped, node: untyped): untyped =
         else: ident($child[1])
         # elif child[1].kind in { nnkSym, nnkOpenSymChoice, nnkClosedSymChoice }: ident($child[1])
 
-      echo "[ident kind] ", resultIdent.kind
-      echo "[ident] ", resultIdent
       body = child[2]
 
     # if ident is not passed on
@@ -97,7 +92,6 @@ macro match*(results: untyped, node: untyped): untyped =
       expectKind child[1], { nnkStmtList, nnkOpenSymChoice, nnkClosedSymChoice }
       body = child[1]
 
-    echo "[resultType] ", resultType
     case resultType
     of Ok:
       okIdent = if (resultIdent.isNil) or ($resultIdent == "_"): nil
@@ -123,9 +117,6 @@ macro match*(results: untyped, node: untyped): untyped =
     errAssign = if errIdent.isNil: newEmptyNode()
                 else: quote do:
       let `errIdent` = `errorSym`(`tmp`)
-
-  echo "[okAssign] ", repr okAssign
-  echo "[errAssign] ", repr errAssign
 
   result = quote do:
     let `tmp` = `results`

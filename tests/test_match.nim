@@ -1,7 +1,5 @@
 import std / [ unittest, asyncdispatch, macros ]
-import std / options
 import results
-import optionsutils
 import ../ src / resultutils
 
 suite "match macro":

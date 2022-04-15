@@ -1,5 +1,7 @@
-import std / [ unittest, asyncdispatch ]
+import std / [ unittest, asyncdispatch, macros ]
+import std / options
 import results
+import optionsutils
 import ../ src / resultutils
 
 suite "match macro":
@@ -12,6 +14,12 @@ suite "match macro":
       return ok("hi, " & name)
     return err("No name? 😐")
 
+  proc asyncGreet(name: string = ""): Future[Result[string, string]] {.async.} =
+    if name.len > 0:
+      return ok("hi, " & name)
+    else:
+      return err("No name? 😐")
+
   test "general":
 
     match example():
@@ -21,7 +29,7 @@ suite "match macro":
       Err(_):
         fail
     
-  test "with void type":
+  test "void type":
 
     func returnVoid(flag: bool): Result[void, void] =
       if flag:
@@ -98,13 +106,7 @@ suite "match macro":
         fail
 
   test "async":
-    proc greet(name: string): Future[Result[string, string]] {.async.} =
-      if name.len > 0:
-        return ok("hi, " & name)
-      else:
-        return err("No name? 😐")
-
-    match waitFor greet("Nim"):
+    match waitFor asyncGreet("Nim"):
       Ok(greet):
         check:
           greet == "hi, Nim"
@@ -112,3 +114,16 @@ suite "match macro":
       Err(error):
         check:
           error == "No name? 😐"
+
+  test "nest in template":
+    # related to https://github.com/nim-lang/Nim/issues/11091
+    template greet() =
+      match waitFor asyncGreet():
+        Ok(hi):
+          check:
+            hi.len > 0
+
+        Err(msg):
+          check:
+            msg == "No name? 😐"
+    greet

@@ -39,8 +39,11 @@ macro match*(results: untyped, node: untyped): untyped =
   ##    assert msg == "hi, Nim"
   ## 
   ## more code examples can be found `here<https://github.com/nonnil/resultutils/blob/main/tests/test_match.nim>`_
+  
+  echo lispRepr results
+  echo treeRepr node
 
-  expectKind results, { nnkCall, nnkIdent, nnkCommand, nnkDotExpr }
+  expectKind results, { nnkCall, nnkIdent, nnkCommand, nnkDotExpr, nnkStmtListExpr }
   expectKind node, nnkStmtList
 
   type
@@ -48,12 +51,22 @@ macro match*(results: untyped, node: untyped): untyped =
       Ok
       Err
 
-  func isResultKind(str: string): bool =
-    case str
-    of $Ok, $Err:
-      true
+  func parseResultKind(node: NimNode): ResultKind =
+    # a case label. expect `Ok` or `Err`.
+    expectKind node, { nnkIdent, nnkSym, nnkOpenSymChoice, nnkClosedSymChoice }
+    if node.kind == nnkIdent:
+      case $node
+      of "Ok": return Ok
+      of "Err": return Err
+      else:
+        error "Only \"Err\" and \"Ok\" are allowed as case labels"
 
-    else: false
+    else:
+      case $node
+      of "OK", "Ok": return Ok
+      of "ERR", "Err": return Err
+      else:
+        error "Only \"Err\" and \"Ok\" are allowed as case labels"
 
   var
     okIdent, okBody: NimNode
@@ -61,32 +74,37 @@ macro match*(results: untyped, node: untyped): untyped =
   
   for child in node:
     expectKind child, nnkCall 
-    # a case label. expect `Ok` or `Err`.
-    expectKind child[0], nnkIdent
-      
-    let resultType = $child[0]
+
+    # expectKind child[1], { nnkIdent, nnkSym, nnkOpenSymChoice, nnkClosedSymChoice, nnkStmtList }
+
+    let resultType = parseResultKind(child[0])
     var resultIdent, body: NimNode = nil
 
     # an ident
-    if child[1].kind == nnkIdent:
+    if child[1].kind in { nnkIdent, nnkSym, nnkOpenSymChoice, nnkClosedSymChoice }:
       # a body
-      expectKind child[2], nnkStmtList
-      resultIdent = child[1]
+      expectKind child[2], { nnkStmtList, nnkOpenSymChoice, nnkClosedSymChoice }
+      resultIdent = if child[1].kind == nnkIdent: child[1]
+        else: ident($child[1])
+        # elif child[1].kind in { nnkSym, nnkOpenSymChoice, nnkClosedSymChoice }: ident($child[1])
+
+      echo "[ident kind] ", resultIdent.kind
+      echo "[ident] ", resultIdent
       body = child[2]
 
     # if ident is not passed on
     else:
-      expectKind child[1], nnkStmtList
+      expectKind child[1], { nnkStmtList, nnkOpenSymChoice, nnkClosedSymChoice }
       body = child[1]
 
-    if not resultType.isResultKind(): error "Only \"Err\" and \"Ok\" are allowed as case labels"
+    echo "[resultType] ", resultType
     case resultType
-    of $Ok:
+    of Ok:
       okIdent = if (resultIdent.isNil) or ($resultIdent == "_"): nil
                 else: resultIdent
       okBody = body
 
-    of $Err:
+    of Err:
       errIdent = if (resultIdent.isNil) or ($resultIdent == "_"): nil
                  else: resultIdent
       errBody = body
@@ -105,6 +123,9 @@ macro match*(results: untyped, node: untyped): untyped =
     errAssign = if errIdent.isNil: newEmptyNode()
                 else: quote do:
       let `errIdent` = `errorSym`(`tmp`)
+
+  echo "[okAssign] ", repr okAssign
+  echo "[errAssign] ", repr errAssign
 
   result = quote do:
     let `tmp` = `results`

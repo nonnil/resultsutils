@@ -40,7 +40,7 @@ macro match*(results: untyped, node: untyped): untyped =
   ## 
   ## more code examples can be found `here<https://github.com/nonnil/resultutils/blob/main/tests/test_match.nim>`_
   
-  expectKind results, { nnkCall, nnkIdent, nnkCommand, nnkDotExpr, nnkStmtListExpr }
+  expectKind results, { nnkCall, nnkIdent, nnkCommand, nnkDotExpr, nnkStmtListExpr, nnkSym, nnkOpenSymChoice, nnkClosedSymChoice }
   expectKind node, nnkStmtList
 
   type

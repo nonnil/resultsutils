@@ -6,7 +6,7 @@ inspired by [optionsutils](https://github.com/PMunch/nim-optionsutils).
 ## Usage
 
 ```nim
-import results, resultutils
+import results, resultsutils
 
 func greet(name: string): Result[string, string] =
   if name.len > 0:

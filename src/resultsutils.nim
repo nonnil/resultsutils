@@ -38,7 +38,7 @@ macro match*(results: untyped, node: untyped): untyped =
   ##    
   ##    assert msg == "hi, Nim"
   ## 
-  ## more code examples can be found `here<https://github.com/nonnil/resultutils/blob/main/tests/test_match.nim>`_
+  ## more code examples can be found `here<https://github.com/nonnil/resultsutils/blob/main/tests/test_match.nim>`_
   
   expectKind results, { nnkCall, nnkIdent, nnkCommand, nnkDotExpr, nnkStmtListExpr, nnkSym, nnkOpenSymChoice, nnkClosedSymChoice }
   expectKind node, nnkStmtList

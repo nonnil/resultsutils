@@ -28,3 +28,9 @@ more code examples can be found [here](https://github.com/nonnil/resultutils/tre
 ```bash
 nimble install resultutils
 ```
+
+or add a dependency to your .nimble file:
+
+```text
+requires "resultutils"
+```

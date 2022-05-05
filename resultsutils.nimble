@@ -5,6 +5,7 @@ author        = "Luca (@nonnil)"
 description   = "Utility macros for easier handling of Result"
 license       = "MIT"
 srcDir        = "src"
+installFiles  = "resultsutils.nim"
 
 
 # Dependencies

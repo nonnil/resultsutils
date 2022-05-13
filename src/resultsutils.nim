@@ -78,7 +78,7 @@ macro match*(results: untyped, node: untyped): untyped =
     var resultIdent, body: NimNode = nil
 
     # an ident
-    if child[1].kind in { nnkIdent, nnkSym, nnkOpenSymChoice, nnkClosedSymChoice }:
+    if child[1].kind in { nnkIdent, nnkTupleConstr, nnkSym, nnkOpenSymChoice, nnkClosedSymChoice }:
       # a body
       expectKind child[2], { nnkStmtList, nnkOpenSymChoice, nnkClosedSymChoice }
       resultIdent = if child[1].kind == nnkIdent: child[1]
